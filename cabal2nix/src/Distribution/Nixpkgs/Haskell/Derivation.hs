@@ -8,7 +8,7 @@ module Distribution.Nixpkgs.Haskell.Derivation
   , extraFunctionArgs, libraryDepends, executableDepends, testDepends, configureFlags
   , cabalFlags, runHaddock, jailbreak, doCheck, doBenchmark, testTarget, hyperlinkSource, enableSplitObjs
   , enableLibraryProfiling, enableExecutableProfiling, phaseOverrides, editedCabalFile, metaSection
-  , dependencies, setupDepends, benchmarkDepends, enableSeparateDataOutput, extraAttributes
+  , dependencies, setupDepends, benchmarkDepends, enableSeparateDataOutput, extraAttributes, testExes, benchExes
   )
   where
 
@@ -65,6 +65,8 @@ data Derivation = MkDerivation
   , _editedCabalFile            :: String
   , _enableSeparateDataOutput   :: Bool
   , _metaSection                :: Meta
+  , _testExes                   :: Set String
+  , _benchExes                   :: Set String
   }
   deriving (Show, Generic)
 
@@ -98,6 +100,8 @@ nullDerivation = MkDerivation
   , _editedCabalFile = error "undefined Derivation.editedCabalFile"
   , _enableSeparateDataOutput = error "undefined Derivation.enableSeparateDataOutput"
   , _metaSection = error "undefined Derivation.metaSection"
+  , _testExes = error "undefined Derivation.testExes"
+  , _benchExes = error "undefined Derivation.benchExes"
   }
 
 makeLenses ''Derivation
@@ -139,6 +143,8 @@ instance Pretty Derivation where
       , boolattr "hyperlinkSource" (not _hyperlinkSource) _hyperlinkSource
       , onlyIf (not (null _phaseOverrides)) $ vcat ((map text . lines) _phaseOverrides)
       , pPrint _metaSection
+      , listattr "testExes" empty (map show $ toAscList _testExes)
+      , listattr "benchExes" empty (map show $ toAscList _benchExes)
       , vcat [ attr k (text v) | (k,v) <- Map.toList _extraAttributes ]
       ]
     , rbrace

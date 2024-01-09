@@ -123,6 +123,8 @@ fromPackageDescription haskellResolver nixpkgsResolver missingDeps flags Package
     & editedCabalFile .~ (if xrev > 0
                              then fromMaybe (error (display package ++ ": X-Cabal-File-Hash field is missing")) (lookup "X-Cabal-File-Hash" customFieldsPD)
                              else "")
+    & testExes .~ Set.fromList (map (unUnqualComponentName . testName) testSuites)
+    & benchExes .~ Set.fromList (map (unUnqualComponentName . benchmarkName) benchmarks)
     & metaSection .~ ( Nix.nullMeta
 #if MIN_VERSION_Cabal(3,2,0)
                      & Nix.homepage .~ stripRedundanceSpaces (fromShortText homepage)
